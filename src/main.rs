@@ -15,5 +15,5 @@ fn main() {
         .clone();
 
     let billable = billable::TogglBillable::new(api_token);
-    println!("{:?}", billable.report())
+    println!("{}", billable.report().expect("Failed to prepare report."));
 }

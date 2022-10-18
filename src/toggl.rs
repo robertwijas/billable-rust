@@ -86,18 +86,18 @@ pub struct TimeEntry {
 
 #[derive(Debug, Deserialize)]
 pub struct ClientSummaryReport {
-    data: Vec<ClientSummary>,
+    pub data: Vec<ClientSummary>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct ClientSummary {
-    title: ClientSummaryTitle,
-    time: i32,
+    pub title: ClientSummaryTitle,
+    pub time: i32,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct ClientSummaryTitle {
-    client: String,
+    pub client: String,
 }
 
 #[test]
@@ -127,7 +127,10 @@ impl Service {
             .get(endpoint.url())
             .basic_auth(&self.api_token, Some("api_token"))
             .header(CONTENT_TYPE, "application/json")
+            .query(&endpoint.params)
             .send();
+
+        // println!("{:?}", response);
 
         response?.json()
     }
