@@ -25,7 +25,6 @@ impl API {
 }
 
 impl<T: DeserializeOwned> Endpoint<T> {
-    // TODO: consider implementing String conversion
     fn url(&self) -> String {
         format!(
             "https://api.track.toggl.com/{}/{}",
