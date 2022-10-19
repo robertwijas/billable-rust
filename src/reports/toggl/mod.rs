@@ -30,7 +30,7 @@ impl super::Billable for Billable {
                     .iter()
                     .map(|x| {
                         let client = Client {
-                            name: x.title.client.clone(),
+                            name: x.title.client.clone().unwrap_or(String::from("Unassigned")),
                         };
                         (client, x.time / (60 * 60 * 1000))
                     })

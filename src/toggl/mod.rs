@@ -96,7 +96,7 @@ pub struct ClientSummary {
 
 #[derive(Debug, Deserialize)]
 pub struct ClientSummaryTitle {
-    pub client: String,
+    pub client: Option<String>,
 }
 
 #[test]
