@@ -1,5 +1,7 @@
 # Billable
 
+![status](https://github.com/robertwijas/billable-rust/actions/workflows/rust.yml/badge.svg)
+
 ## Features
 
 - [x] show hours for current month per client
