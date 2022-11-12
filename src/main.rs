@@ -1,4 +1,5 @@
 use billable::reports::Billable;
+use billable::reports::Month;
 use config::Config;
 
 fn main() {
@@ -10,5 +11,16 @@ fn main() {
         .expect("Failed to read configuration.");
 
     let billable = billable::reports::toggl::Billable::new(config.api_token);
-    println!("{}", billable.report().expect("Failed to prepare report."));
+    report(&billable, Month::current());
+    report(&billable, Month::current().previous());
+}
+
+fn report(billable: &dyn Billable, month: Month) {
+    println!("{}", month);
+    println!(
+        "{}",
+        billable
+            .report(month.into())
+            .expect("Failed to prepare report.")
+    );
 }

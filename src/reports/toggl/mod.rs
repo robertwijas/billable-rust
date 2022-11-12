@@ -13,14 +13,18 @@ impl Billable {
 }
 
 use super::{BillableError, Client, Report};
+use std::ops::Range;
+use time::Date;
 
 impl super::Billable for Billable {
-    fn report(&self) -> Result<super::Report, super::BillableError> {
+    fn report(&self, range: Range<Date>) -> Result<super::Report, super::BillableError> {
         self.service
             .get(Endpoint::me())
             .and_then(|user| {
                 self.service.get(Endpoint::client_summary_report(
                     user.default_workspace_id.to_string(),
+                    range.start,
+                    range.end,
                 ))
             })
             .map(|summary| Report {

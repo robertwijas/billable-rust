@@ -2,6 +2,8 @@ use reqwest::header::CONTENT_TYPE;
 use serde::de::DeserializeOwned;
 use serde::Deserialize;
 use std::{collections::HashMap, marker::PhantomData};
+use time::format_description::well_known::{iso8601, Iso8601};
+use time::Date;
 
 pub struct Endpoint<T> {
     api: API,
@@ -57,7 +59,7 @@ impl Endpoint<Vec<TimeEntry>> {
 }
 
 impl Endpoint<ClientSummaryReport> {
-    pub fn client_summary_report(workspace_id: String) -> Self {
+    pub fn client_summary_report(workspace_id: String, since: Date, until: Date) -> Self {
         Endpoint {
             api: API::ReportsV2,
             path: "summary".into(),
@@ -66,7 +68,8 @@ impl Endpoint<ClientSummaryReport> {
                 ("grouping", "clients".into()),
                 ("subgrouping", "users".into()),
                 ("user_agent", "billable".into()),
-                ("since", "2022-10-01".into()),
+                ("since", format(since)),
+                ("until", format(until)),
             ])),
             result: PhantomData,
         }
@@ -105,6 +108,23 @@ fn me_url() {
         Endpoint::me().url(),
         "https://api.track.toggl.com/api/v9/me"
     );
+}
+fn format(date: Date) -> String {
+    date.format(
+        &Iso8601::<
+            {
+                iso8601::Config::DEFAULT
+                    .set_formatted_components(iso8601::FormattedComponents::Date)
+                    .encode()
+            },
+        >,
+    )
+    .expect("standard formatting should just work")
+}
+
+#[test]
+fn test_date_formatting() {
+    assert_eq!(format(time::macros::date!(2020 - 03 - 23)), "2020-03-23")
 }
 
 pub struct Service {

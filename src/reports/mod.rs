@@ -1,9 +1,14 @@
 pub mod toggl;
 
 use std::fmt::Display;
+use std::ops::Range;
+use time::Date;
+
+pub mod month;
+pub use month::*;
 
 pub trait Billable {
-    fn report(&self) -> Result<Report, BillableError>;
+    fn report(&self, range: Range<Date>) -> Result<Report, BillableError>;
 }
 
 #[derive(Debug)]
