@@ -10,4 +10,4 @@ Cargo.lock
 **/*.rs.bk
 
 # Local configuration file
-config.toml
+config.toml*
