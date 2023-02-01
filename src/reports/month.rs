@@ -2,7 +2,7 @@ use std::fmt::Display;
 use std::ops::Range;
 use time::{Date, OffsetDateTime};
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Month {
     year: i32,
     month: time::Month,
