@@ -3,6 +3,7 @@ pub mod toggl;
 use std::fmt::Display;
 use std::ops::Range;
 use time::Date;
+use colored::*;
 
 pub mod month;
 pub use month::*;
@@ -30,7 +31,8 @@ pub struct Client {
 impl Display for Report {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         self.total.iter().for_each(|c| {
-            writeln!(f, "{}: {}h", c.0.name, c.1).unwrap();
+            let hours = format!("{}h", c.1).bold();
+            writeln!(f, "{}: {}", c.0.name.dimmed(), hours).unwrap();
         });
         Ok(())
     }

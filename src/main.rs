@@ -2,6 +2,7 @@ use billable::reports::Billable;
 use billable::reports::Month;
 use clap::Parser;
 use config::Config;
+use colored::*;
 
 #[derive(Parser, Debug)]
 struct Args {
@@ -35,7 +36,7 @@ fn main() {
 }
 
 fn report(billable: &dyn Billable, month: Month) {
-    println!("{}", month);
+    println!("{}", format!("{}", month).bold().reversed());
     println!(
         "{}",
         billable
