@@ -15,7 +15,7 @@
 - [ ] use basic text formatting when displaying results
 - [ ] implement async http requests
 - [ ] show estimated hours for current month per client
-- [ ] configure monthly revenue goal
+- [x] configure monthly goal
 - [ ] indicate goal progress and likelihood of hitting the target
 - [ ] auto currency conversion
 

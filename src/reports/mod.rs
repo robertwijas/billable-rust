@@ -1,15 +1,40 @@
 pub mod toggl;
 
-use std::fmt::Display;
-use std::ops::Range;
-use time::Date;
 use colored::*;
+use serde::Deserialize;
+use std::collections::HashMap;
+use std::ops::RangeInclusive;
+use time::Date;
 
 pub mod month;
 pub use month::*;
 
 pub trait Billable {
-    fn report(&self, range: Range<Date>) -> Result<Report, BillableError>;
+    fn report(&self, range: &RangeInclusive<Date>) -> Result<Report, BillableError>;
+
+    fn print_report(&self, month: Month, configs: &Option<HashMap<String, ClientConfig>>) {
+        println!("{}", format!("{}", month).bold().reversed());
+        let report = self
+            .report(&month.clone().into())
+            .expect("failed to prepare report");
+
+        for (client, hours) in report.total {
+            print!(
+                "{:<25} {:^10}",
+                client.name.dimmed(),
+                format!("{}h", hours).bold()
+            );
+
+            // TODO: why the line below has to be so ugly ???
+            let goal = configs.as_ref().and_then(|x| x.get(&client.name)?.goal);
+            if let Some(goal) = goal {
+                let estimated = month.estimated_hours(hours);
+                print!(" {:^10}", format!("{}h/{}h", estimated, goal));
+            }
+
+            println!();
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -19,21 +44,17 @@ pub enum BillableError {
 
 #[derive(Debug)]
 pub struct Report {
-    total: Vec<(Client, i32)>,
+    pub total: Vec<(Client, u16)>,
 }
 
 #[derive(Debug)]
 pub struct Client {
-    name: String,
+    pub name: String,
     // rate: u8, // TODO: implement currencies
 }
 
-impl Display for Report {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.total.iter().for_each(|c| {
-            let hours = format!("{}h", c.1).bold();
-            writeln!(f, "{}: {}", c.0.name.dimmed(), hours).unwrap();
-        });
-        Ok(())
-    }
+#[derive(Deserialize, Debug, Copy, Clone)]
+pub struct ClientConfig {
+    pub rate: Option<u16>,
+    pub goal: Option<u16>,
 }

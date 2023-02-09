@@ -4,8 +4,10 @@ use std::collections::HashMap;
 pub mod reports;
 pub mod toggl;
 
-#[derive(Deserialize)]
+use reports::ClientConfig;
+
+#[derive(Deserialize, Debug)]
 pub struct Config {
     pub api_token: String,
-    pub rates: HashMap<String, u16>,
+    pub clients: Option<HashMap<String, ClientConfig>>,
 }

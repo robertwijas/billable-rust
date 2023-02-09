@@ -59,7 +59,7 @@ impl Endpoint<Vec<TimeEntry>> {
 }
 
 impl Endpoint<ClientSummaryReport> {
-    pub fn client_summary_report(workspace_id: String, since: Date, until: Date) -> Self {
+    pub fn client_summary_report(workspace_id: String, since: &Date, until: &Date) -> Self {
         Endpoint {
             api: API::ReportsV2,
             path: "summary".into(),
@@ -109,7 +109,7 @@ fn me_url() {
         "https://api.track.toggl.com/api/v9/me"
     );
 }
-fn format(date: Date) -> String {
+fn format(date: &Date) -> String {
     date.format(
         &Iso8601::<
             {
@@ -124,7 +124,7 @@ fn format(date: Date) -> String {
 
 #[test]
 fn test_date_formatting() {
-    assert_eq!(format(time::macros::date!(2020 - 03 - 23)), "2020-03-23")
+    assert_eq!(format(&time::macros::date!(2020 - 03 - 23)), "2020-03-23")
 }
 
 pub struct Service {
