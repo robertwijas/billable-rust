@@ -29,7 +29,13 @@ pub trait Billable {
             let goal = configs.as_ref().and_then(|x| x.get(&client.name)?.goal);
             if let Some(goal) = goal {
                 let estimated = month.estimated_hours(hours);
-                print!(" {:^10}", format!("{}h/{}h", estimated, goal));
+                let indicator: &str;
+                if estimated < goal {
+                    indicator = "🔴";
+                } else {
+                    indicator = "🟢";
+                }
+                print!(" {:^10}", format!("{}h/{}h {}", estimated, goal, indicator));
             }
 
             println!();

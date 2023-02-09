@@ -10,14 +10,17 @@
 - [x] read user config file from $HOME/.billable.toml or similar
 - [x] support arg for controlling the number of recent months to display
 - [x] better time precision (or round up hours)
+- [x] configure monthly goal
+- [x] use basic text formatting when displaying results
+- [x] show estimated hours for current month per client
+- [x] indicate goal progress
+- [ ] add option to show weekly reports
+- [ ] configure automatic releases with github actions
+- [ ] write better README
 - [ ] use fixed hours in DEBUG mode 
 - [ ] display hours in PLN AKA support hourly rates :)
-- [ ] use basic text formatting when displaying results
-- [ ] implement async http requests
-- [ ] show estimated hours for current month per client
-- [x] configure monthly goal
-- [ ] indicate goal progress and likelihood of hitting the target
 - [ ] auto currency conversion
+- [ ] implement async http requests
 
 ## Notes 
 

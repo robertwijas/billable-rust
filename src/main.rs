@@ -16,8 +16,8 @@ fn main() {
     let user_config_path = project_dirs.config_dir().join("config");
 
     let config = Config::builder()
-        .add_source(config::File::with_name("config").required(false))
         .add_source(config::File::with_name(user_config_path.to_str().unwrap()))
+        .add_source(config::File::with_name("config").required(false))
         .build()
         .expect("cannot build config")
         .try_deserialize::<billable::Config>()
