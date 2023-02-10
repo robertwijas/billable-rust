@@ -1,6 +1,6 @@
 use std::fmt::Display;
 use std::ops::RangeInclusive;
-use time::{Date, OffsetDateTime, Weekday};
+use time::{Date, Duration, OffsetDateTime, Weekday};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Month {
@@ -60,15 +60,14 @@ impl Month {
         DaysIterator::new(self.clone().into())
     }
 
-    pub fn estimated_hours(&self, done_hours: u16) -> u16 {
+    pub fn estimated_hours(&self, done: Duration) -> Duration {
         let range_until_now = RangeInclusive::new(
             self.start(),
             self.end().min(OffsetDateTime::now_utc().date()),
         );
 
-        // TODO: cleanup numeric types conversions
-        done_hours * u16::try_from(self.working_days_count()).unwrap()
-            / u16::try_from(range_until_now.working_days_count()).unwrap()
+        // TODO: division by zero (?)
+        done * self.working_days_count() as f32 / range_until_now.working_days_count() as f32
     }
 }
 

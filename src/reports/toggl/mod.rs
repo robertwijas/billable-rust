@@ -14,7 +14,7 @@ impl Billable {
 
 use super::{BillableError, Client, Report};
 use std::ops::RangeInclusive;
-use time::Date;
+use time::{Date, Duration};
 
 impl super::Billable for Billable {
     fn report(&self, range: &RangeInclusive<Date>) -> Result<super::Report, super::BillableError> {
@@ -28,18 +28,15 @@ impl super::Billable for Billable {
                 ))
             })
             .map(|summary| Report {
-                // TODO: implement From conversion?
                 total: summary
                     .data
                     .iter()
                     .map(|x| {
-                        let client = Client {
-                            name: x.title.client.clone().unwrap_or(String::from("Unassigned")),
-                        };
                         (
-                            client,
-                            u16::try_from(x.time / (60 * 60 * 1000))
-                                .expect("hours should fit in u16"),
+                            Client {
+                                name: x.title.client.clone().unwrap_or(String::from("Unassigned")),
+                            },
+                            Duration::milliseconds(x.time.into()),
                         )
                     })
                     .collect(),

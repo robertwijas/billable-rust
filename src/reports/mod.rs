@@ -4,7 +4,7 @@ use colored::*;
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::ops::RangeInclusive;
-use time::Date;
+use time::{Date, Duration};
 
 pub mod month;
 pub use month::*;
@@ -22,24 +22,39 @@ pub trait Billable {
             print!(
                 "{:<25} {:^10}",
                 client.name.dimmed(),
-                format!("{}h", hours).bold()
+                hours.format_as_hours().bold()
             );
 
             // TODO: why the line below has to be so ugly ???
             let goal = configs.as_ref().and_then(|x| x.get(&client.name)?.goal);
             if let Some(goal) = goal {
+                let goal = Duration::hours(goal.into());
                 let estimated = month.estimated_hours(hours);
-                let indicator: &str;
-                if estimated < goal {
-                    indicator = "🔴";
-                } else {
-                    indicator = "🟢";
-                }
-                print!(" {:^10}", format!("{}h/{}h {}", estimated, goal, indicator));
+                let indicator = if estimated < goal { "🔴" } else { "🟢" };
+
+                print!(
+                    " {:^10}",
+                    format!(
+                        "{}/{} {}",
+                        estimated.format_as_hours(),
+                        goal.format_as_hours(),
+                        indicator
+                    )
+                );
             }
 
             println!();
         }
+    }
+}
+
+trait FormatAsHours {
+    fn format_as_hours(&self) -> String;
+}
+
+impl FormatAsHours for Duration {
+    fn format_as_hours(&self) -> String {
+        format!("{}h", self.whole_hours())
     }
 }
 
@@ -50,7 +65,7 @@ pub enum BillableError {
 
 #[derive(Debug)]
 pub struct Report {
-    pub total: Vec<(Client, u16)>,
+    pub total: Vec<(Client, Duration)>,
 }
 
 #[derive(Debug)]

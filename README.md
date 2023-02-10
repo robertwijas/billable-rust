@@ -14,6 +14,7 @@
 - [x] use basic text formatting when displaying results
 - [x] show estimated hours for current month per client
 - [x] indicate goal progress
+- [ ] add option to show time with minutes
 - [ ] add option to show weekly reports
 - [ ] configure automatic releases with github actions
 - [ ] write better README
