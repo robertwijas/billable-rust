@@ -1,4 +1,8 @@
 api_token = "<TOGGL API TOKEN>"
 
+# Configuration settings for your clients. Make sure the name matches the client's name in Toggl.
 [clients."My Best Client"]
-goal = 100
+goal = 100 # optional target for number of billed hours per month
+
+[clients."My Worst Client"]
+goal = 10

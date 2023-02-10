@@ -2,6 +2,15 @@
 
 ![status](https://github.com/robertwijas/billable-rust/actions/workflows/rust.yml/badge.svg)
 
+## Configuration
+
+Configuration file `config.toml` is loaded from:
+* current directory if available
+* or `~/Library/Application Support/com.robertwijas.billable`
+
+Make sure either one of these is avaiable. You can copy and modify the example configuation:
+https://github.com/robertwijas/billable-rust/blob/61c73e63239b2ae870c9ba484d8ac3891550ca5a/config.toml.example#L1-L4
+
 ## Todos 
 
 - [x] show hours for current month per client
