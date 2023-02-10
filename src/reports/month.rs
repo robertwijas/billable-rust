@@ -60,6 +60,10 @@ impl Month {
         DaysIterator::new(self.clone().into())
     }
 
+    pub fn iter(&self) -> MonthsIterator {
+        MonthsIterator::new(self.clone())
+    }
+
     pub fn estimated_hours(&self, done: Duration) -> Duration {
         let range_until_now = RangeInclusive::new(
             self.start(),
@@ -132,6 +136,34 @@ impl Iterator for DaysIterator {
         }
 
         next
+    }
+}
+
+pub struct MonthsIterator {
+    current: Month,
+}
+
+impl MonthsIterator {
+    pub fn new(start: Month) -> Self {
+        MonthsIterator { current: start }
+    }
+}
+
+impl Iterator for MonthsIterator {
+    type Item = Month;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let next = self.current.clone();
+        self.current = self.current.next();
+        Some(next)
+    }
+}
+
+impl DoubleEndedIterator for MonthsIterator {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        let next = self.current.clone();
+        self.current = self.current.previous();
+        Some(next)
     }
 }
 

@@ -6,7 +6,7 @@ use config::Config;
 #[derive(Parser, Debug)]
 struct Args {
     #[arg(short, long, default_value_t = 1)]
-    months: u8,
+    months: usize,
 }
 
 fn main() {
@@ -27,9 +27,7 @@ fn main() {
 
     let billable = billable::reports::toggl::Billable::new(config.api_token);
 
-    let mut month = Month::current();
-    for _ in 0..args.months {
+    for month in Month::current().iter().rev().take(args.months) {
         billable.print_report(month.clone(), &config.clients);
-        month = month.previous();
     }
 }
