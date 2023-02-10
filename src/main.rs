@@ -28,6 +28,6 @@ fn main() {
     let billable = billable::reports::toggl::Billable::new(config.api_token);
 
     for month in Month::current().iter().rev().take(args.months) {
-        billable.print_report(month.clone(), &config.clients);
+        billable.print_report(month, &config.clients);
     }
 }

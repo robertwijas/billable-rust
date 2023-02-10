@@ -21,12 +21,12 @@ pub trait Billable {
         for (client, hours) in report.total {
             print!(
                 "{:<25} {:^10}",
-                client.name.dimmed(),
+                client.dimmed(),
                 hours.format_as_hours().bold()
             );
 
             // TODO: why the line below has to be so ugly ???
-            let goal = configs.as_ref().and_then(|x| x.get(&client.name)?.goal);
+            let goal = configs.as_ref().and_then(|x| x.get(&*client)?.goal);
             if let Some(goal) = goal {
                 let goal = Duration::hours(goal.into());
                 let estimated = month.estimated_hours(hours);
@@ -71,7 +71,14 @@ pub struct Report {
 #[derive(Debug)]
 pub struct Client {
     pub name: String,
-    // rate: u8, // TODO: implement currencies
+}
+
+impl std::ops::Deref for Client {
+    type Target = String;
+
+    fn deref(&self) -> &Self::Target {
+        &self.name
+    }
 }
 
 #[derive(Deserialize, Debug, Copy, Clone)]

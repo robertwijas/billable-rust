@@ -109,6 +109,7 @@ fn me_url() {
         "https://api.track.toggl.com/api/v9/me"
     );
 }
+
 fn format(date: &Date) -> String {
     date.format(
         &Iso8601::<
@@ -148,8 +149,6 @@ impl Service {
             .header(CONTENT_TYPE, "application/json")
             .query(&endpoint.params)
             .send();
-
-        // println!("{:?}", response);
 
         response?.json()
     }
