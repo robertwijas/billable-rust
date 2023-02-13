@@ -35,8 +35,10 @@ Options:
 - [x] show estimated hours for current month per client
 - [x] indicate goal progress
 - [x] add option to show time with minutes
+- [x] calculate optimal weekly and daily pace to hit the goal
+- [ ] support show minutes flag in goal hints
+- [ ] add option to display _Total_ row for all clients
 - [ ] add option to show weekly reports
-- [ ] calculate optimal weekly and daily pace to hit the goal
 - [ ] support holidays (?) or allow to somehow override working days
 - [ ] configure automatic releases with github actions
 - [ ] reports/configuration per project

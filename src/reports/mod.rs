@@ -67,9 +67,12 @@ fn calculate_goal_status<WT: WorkingTime>(progress: GoalProgress<WT>) -> GoalSta
         * (1 as f64
             + progress.working_time.left().as_seconds_f64()
                 / progress.working_time.used().as_seconds_f64());
+    let daily_target =
+        (progress.goal - progress.done) / progress.working_time.left().whole_days() as f64;
     GoalStatus {
         progress,
         estimated,
+        daily_target,
     }
 }
 
@@ -85,6 +88,7 @@ impl WorkingTime for RangeInclusive<Date> {
             OffsetDateTime::now_utc().date(),
         ))
     }
+
     fn left(&self) -> Duration {
         available_working_time_without_weekends(&RangeInclusive::new(
             OffsetDateTime::now_utc().date(),
@@ -155,6 +159,7 @@ impl<WT: WorkingTime> Display for GoalProgress<WT> {
 struct GoalStatus<WT: WorkingTime> {
     progress: GoalProgress<WT>,
     estimated: Duration,
+    daily_target: Duration,
 }
 
 impl<WT: WorkingTime> GoalStatus<WT> {
@@ -169,12 +174,15 @@ impl<WT: WorkingTime> GoalStatus<WT> {
 
 impl<WT: WorkingTime> Display for GoalStatus<WT> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let weekly_target: Duration = self.daily_target * 5;
         write!(
             f,
-            "{}/{} {}",
+            "{} {}/{} 🎯 {} a day, {} a week",
+            self.emoji_indicator(),
             self.estimated.format_as_hours(),
             self.progress.goal.format_as_hours(),
-            self.emoji_indicator()
+            self.daily_target.format_as_hours(),
+            weekly_target.format_as_hours(),
         )
     }
 }
