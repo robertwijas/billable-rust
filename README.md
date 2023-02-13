@@ -34,9 +34,12 @@ Options:
 - [x] use basic text formatting when displaying results
 - [x] show estimated hours for current month per client
 - [x] indicate goal progress
-- [ ] add option to show time with minutes
+- [x] add option to show time with minutes
 - [ ] add option to show weekly reports
+- [ ] calculate optimal weekly and daily pace to hit the goal
+- [ ] support holidays (?) or allow to somehow override working days
 - [ ] configure automatic releases with github actions
+- [ ] reports/configuration per project
 - [ ] write better README
 - [ ] use fixed hours in DEBUG mode 
 - [ ] display hours in PLN AKA support hourly rates :)

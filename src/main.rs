@@ -7,6 +7,8 @@ use config::Config;
 struct Args {
     #[arg(short, long, default_value_t = 1)]
     months: usize,
+    #[arg(short, long, default_value_t = false)]
+    show_minutes: bool,
 }
 
 fn main() {
@@ -28,6 +30,6 @@ fn main() {
     let billable = billable::reports::toggl::Billable::new(config.api_token);
 
     for month in Month::current().iter().rev().take(args.months) {
-        billable.print_report(month, &config.clients);
+        billable.print_report(month, args.show_minutes, &config.clients);
     }
 }

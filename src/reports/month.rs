@@ -1,6 +1,6 @@
 use std::fmt::Display;
 use std::ops::RangeInclusive;
-use time::{Date, Duration, OffsetDateTime, Weekday};
+use time::{Date, OffsetDateTime};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Month {
@@ -13,7 +13,7 @@ impl Month {
         Self::including(OffsetDateTime::now_utc().date())
     }
 
-    fn including(date: Date) -> Self {
+    pub fn including(date: Date) -> Self {
         let (year, month, _) = date.to_calendar_date();
         Month { year, month }
     }
@@ -63,16 +63,6 @@ impl Month {
     pub fn iter(&self) -> MonthsIterator {
         MonthsIterator::new(self.clone())
     }
-
-    pub fn estimated_hours(&self, done: Duration) -> Duration {
-        let range_until_now = RangeInclusive::new(
-            self.start(),
-            self.end().min(OffsetDateTime::now_utc().date()),
-        );
-
-        // TODO: division by zero (?)
-        done * self.working_days_count() as f32 / range_until_now.working_days_count() as f32
-    }
 }
 
 impl Display for Month {
@@ -87,24 +77,6 @@ impl Into<RangeInclusive<Date>> for Month {
     }
 }
 
-pub trait WorkingDays {
-    fn working_days_count(&self) -> usize;
-}
-
-impl WorkingDays for RangeInclusive<Date> {
-    fn working_days_count(&self) -> usize {
-        DaysIterator::new(self.clone())
-            .filter(|d| ![Weekday::Saturday, Weekday::Sunday].contains(&d.weekday()))
-            .count()
-    }
-}
-
-impl WorkingDays for Month {
-    fn working_days_count(&self) -> usize {
-        <Month as Into<RangeInclusive<Date>>>::into(self.clone()).working_days_count()
-    }
-}
-
 pub struct DaysIterator {
     range: RangeInclusive<Date>,
     previous: Date,
@@ -112,13 +84,11 @@ pub struct DaysIterator {
 
 impl DaysIterator {
     pub fn new(range: RangeInclusive<Date>) -> Self {
-        Self {
-            range: range.clone(),
-            previous: range
-                .start()
-                .previous_day()
-                .expect("expecting the past to be there"),
-        }
+        let previous = range
+            .start()
+            .previous_day()
+            .expect("expecting the past to be there");
+        Self { range, previous }
     }
 }
 
@@ -187,17 +157,5 @@ mod tests {
     fn days() {
         assert_eq!(31, Month::including(date!(2023 - 01 - 01)).days().count());
         assert_eq!(28, Month::including(date!(2023 - 02 - 01)).days().count());
-    }
-
-    #[test]
-    fn working_days() {
-        assert_eq!(
-            22,
-            Month::including(date!(2023 - 01 - 01)).working_days_count()
-        );
-        assert_eq!(
-            20,
-            Month::including(date!(2023 - 02 - 01)).working_days_count()
-        );
     }
 }
