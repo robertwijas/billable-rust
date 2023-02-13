@@ -1,4 +1,5 @@
 use billable::reports::Billable;
+use billable::reports::FormattingOptions;
 use billable::reports::Month;
 use clap::Parser;
 use config::Config;
@@ -30,6 +31,12 @@ fn main() {
     let billable = billable::reports::toggl::Billable::new(config.api_token);
 
     for month in Month::current().iter().rev().take(args.months) {
-        billable.print_report(month, args.show_minutes, &config.clients);
+        billable.print_report(
+            month,
+            FormattingOptions {
+                show_minutes: args.show_minutes,
+            },
+            &config.clients,
+        );
     }
 }

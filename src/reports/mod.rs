@@ -16,7 +16,7 @@ pub trait Billable {
     fn print_report(
         &self,
         month: Month,
-        show_minutes: bool,
+        options: FormattingOptions,
         configs: &Option<HashMap<String, ClientConfig>>,
     ) {
         println!("{}", format!("{}", month).bold().reversed());
@@ -25,20 +25,20 @@ pub trait Billable {
             .expect("failed to prepare report");
 
         for (client, hours) in report.total {
-            print!("{:<25} {:>7}", client.dimmed(), hours.format(show_minutes));
+            print!("{:<23} {:>5}", client.dimmed(), hours.format(&options));
 
             // TODO: why the line below has to be so ugly ???
             let goal = configs.as_ref().and_then(|x| x.get(&*client)?.goal);
             if let Some(goal) = goal {
-                let progress = GoalProgress {
-                    goal: Duration::hours(goal.into()),
+                let goal = Goal {
+                    target: Duration::hours(goal.into()),
                     done: hours,
                     working_time: Into::<RangeInclusive<Date>>::into(month.clone()),
                 };
 
-                let status = calculate_goal_status(progress);
+                let status = calculate_goal_status(goal);
 
-                print!(" {:^10}", status);
+                print!(" {:^10}", status.format(&options));
             }
 
             println!();
@@ -46,13 +46,17 @@ pub trait Billable {
     }
 }
 
-trait FormattedDuration {
-    fn format(&self, show_minutes: bool) -> String;
+pub struct FormattingOptions {
+    pub show_minutes: bool,
 }
 
-impl FormattedDuration for Duration {
-    fn format(&self, show_minutes: bool) -> String {
-        if show_minutes {
+trait Formatting {
+    fn format(&self, options: &FormattingOptions) -> String;
+}
+
+impl Formatting for Duration {
+    fn format(&self, options: &FormattingOptions) -> String {
+        if options.show_minutes {
             let hours = self.whole_hours();
             let minutes = (*self - Duration::hours(hours)).whole_minutes();
             format!("{}:{:0>2}", hours, minutes)
@@ -62,15 +66,14 @@ impl FormattedDuration for Duration {
     }
 }
 
-fn calculate_goal_status<WT: WorkingTime>(progress: GoalProgress<WT>) -> GoalStatus<WT> {
-    let estimated = progress.done
+fn calculate_goal_status<WT: WorkingTime>(goal: Goal<WT>) -> GoalStatus<WT> {
+    let estimated = goal.done
         * (1 as f64
-            + progress.working_time.left().as_seconds_f64()
-                / progress.working_time.used().as_seconds_f64());
-    let daily_target =
-        (progress.goal - progress.done) / progress.working_time.left().whole_days() as f64;
+            + goal.working_time.left().as_seconds_f64()
+                / goal.working_time.used().as_seconds_f64());
+    let daily_target = (goal.target - goal.done) / goal.working_time.left().whole_days() as f64;
     GoalStatus {
-        progress,
+        goal,
         estimated,
         daily_target,
     }
@@ -134,18 +137,18 @@ mod tests {
 }
 
 #[derive(Debug, Clone)]
-struct GoalProgress<WT: WorkingTime> {
-    goal: Duration,
+struct Goal<WT: WorkingTime> {
+    target: Duration,
     done: Duration,
     working_time: WT,
 }
 
-impl<WT: WorkingTime> Display for GoalProgress<WT> {
+impl<WT: WorkingTime> Display for Goal<WT> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
             "{} {} {} {}",
-            self.goal,
+            self.target,
             self.done,
             self.working_time.used(),
             self.working_time.left()
@@ -157,14 +160,14 @@ impl<WT: WorkingTime> Display for GoalProgress<WT> {
 // - daily target
 // - weekly target
 struct GoalStatus<WT: WorkingTime> {
-    progress: GoalProgress<WT>,
+    goal: Goal<WT>,
     estimated: Duration,
     daily_target: Duration,
 }
 
 impl<WT: WorkingTime> GoalStatus<WT> {
     fn emoji_indicator(&self) -> &str {
-        if self.estimated < self.progress.goal {
+        if self.estimated < self.goal.target {
             "🔴"
         } else {
             "🟢"
@@ -172,28 +175,17 @@ impl<WT: WorkingTime> GoalStatus<WT> {
     }
 }
 
-impl<WT: WorkingTime> Display for GoalStatus<WT> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl<WT: WorkingTime> Formatting for GoalStatus<WT> {
+    fn format(&self, options: &FormattingOptions) -> String {
         let weekly_target: Duration = self.daily_target * 5;
-        write!(
-            f,
+        format!(
             "{} {}/{} 🎯 {} a day, {} a week",
             self.emoji_indicator(),
-            self.estimated.format_as_hours(),
-            self.progress.goal.format_as_hours(),
-            self.daily_target.format_as_hours(),
-            weekly_target.format_as_hours(),
+            self.estimated.format(options),
+            self.goal.target.format(options),
+            self.daily_target.format(options),
+            weekly_target.format(options),
         )
-    }
-}
-
-trait FormatAsHours {
-    fn format_as_hours(&self) -> String;
-}
-
-impl FormatAsHours for Duration {
-    fn format_as_hours(&self) -> String {
-        format!("{}h", self.whole_hours())
     }
 }
 

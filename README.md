@@ -36,7 +36,7 @@ Options:
 - [x] indicate goal progress
 - [x] add option to show time with minutes
 - [x] calculate optimal weekly and daily pace to hit the goal
-- [ ] support show minutes flag in goal hints
+- [x] support show minutes flag in goal hints
 - [ ] add option to display _Total_ row for all clients
 - [ ] add option to show weekly reports
 - [ ] support holidays (?) or allow to somehow override working days
