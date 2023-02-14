@@ -31,11 +31,10 @@ pub trait Billable {
             if let Some(goal) = goal {
                 let goal = Goal {
                     target: Duration::hours(goal.into()),
-                    done: hours,
                     working_time: Into::<RangeInclusive<Date>>::into(month.clone()),
                 };
 
-                let status = calculate_goal_status(goal);
+                let status = calculate_goal_status(goal, hours);
 
                 print!(" {:^10}", status.format(&options));
             }
@@ -89,14 +88,15 @@ impl Formatting for Duration {
     }
 }
 
-fn calculate_goal_status<WT: WorkingTime>(goal: Goal<WT>) -> GoalStatus<WT> {
-    let estimated = goal.done
+fn calculate_goal_status<WT: WorkingTime>(goal: Goal<WT>, done: Duration) -> GoalStatus<WT> {
+    let estimated = done
         * (1 as f64
             + goal.working_time.left().as_seconds_f64()
                 / goal.working_time.used().as_seconds_f64());
-    let daily_target = (goal.target - goal.done) / goal.working_time.left().whole_days() as f64;
+    let daily_target = (goal.target - done) / goal.working_time.left().whole_days() as f64;
     GoalStatus {
         goal,
+        done,
         estimated,
         daily_target,
     }
@@ -162,12 +162,13 @@ mod tests {
 #[derive(Debug, Clone)]
 struct Goal<WT: WorkingTime> {
     target: Duration,
-    done: Duration,
     working_time: WT,
 }
 
 struct GoalStatus<WT: WorkingTime> {
     goal: Goal<WT>,
+    #[allow(unused)]
+    done: Duration,
     estimated: Duration,
     daily_target: Duration,
 }
