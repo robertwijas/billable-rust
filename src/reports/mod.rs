@@ -201,10 +201,8 @@ impl<WT: WorkingTime> Formatting for GoalStatus<WT> {
             let weekly_target: Duration = daily_target * 5;
 
             format!(
-                "{} {}/{} 🎯 {} a day, {} a week",
-                self.emoji_indicator(),
-                self.estimated.format(options),
-                self.goal.target.format(options),
+                "{} 🎯 {} a day, {} a week",
+                status,
                 daily_target.format_rounding(options, Rounding::Ceil),
                 weekly_target.format(options),
             )
