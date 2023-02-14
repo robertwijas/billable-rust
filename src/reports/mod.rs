@@ -93,7 +93,12 @@ fn calculate_goal_status<WT: WorkingTime>(goal: Goal<WT>, done: Duration) -> Goa
         * (1 as f64
             + goal.working_time.left().as_seconds_f64()
                 / goal.working_time.used().as_seconds_f64());
-    let daily_target = (goal.target - done) / goal.working_time.left().whole_days() as f64;
+    let days_left = goal.working_time.left().whole_days() as f64;
+    let daily_target: Option<Duration> = if days_left > 0.0 {
+        Some((goal.target - done) / days_left)
+    } else {
+        None
+    };
     GoalStatus {
         goal,
         done,
@@ -170,7 +175,7 @@ struct GoalStatus<WT: WorkingTime> {
     #[allow(unused)]
     done: Duration,
     estimated: Duration,
-    daily_target: Duration,
+    daily_target: Option<Duration>,
 }
 
 impl<WT: WorkingTime> GoalStatus<WT> {
@@ -185,15 +190,27 @@ impl<WT: WorkingTime> GoalStatus<WT> {
 
 impl<WT: WorkingTime> Formatting for GoalStatus<WT> {
     fn format_rounding(&self, options: &FormattingOptions, _rounding: Rounding) -> String {
-        let weekly_target: Duration = self.daily_target * 5;
-        format!(
-            "{} {}/{} 🎯 {} a day, {} a week",
+        let status = format!(
+            "{} {}/{}",
             self.emoji_indicator(),
             self.estimated.format(options),
-            self.goal.target.format(options),
-            self.daily_target.format_rounding(options, Rounding::Ceil),
-            weekly_target.format(options),
-        )
+            self.goal.target.format(options)
+        );
+
+        if let Some(daily_target) = self.daily_target {
+            let weekly_target: Duration = daily_target * 5;
+
+            format!(
+                "{} {}/{} 🎯 {} a day, {} a week",
+                self.emoji_indicator(),
+                self.estimated.format(options),
+                self.goal.target.format(options),
+                daily_target.format_rounding(options, Rounding::Ceil),
+                weekly_target.format(options),
+            )
+        } else {
+            status
+        }
     }
 }
 
