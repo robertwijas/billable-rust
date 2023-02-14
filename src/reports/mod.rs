@@ -3,7 +3,6 @@ pub mod toggl;
 use colored::*;
 use serde::Deserialize;
 use std::collections::HashMap;
-use std::fmt::Display;
 use std::ops::RangeInclusive;
 use time::{Date, Duration, OffsetDateTime, Weekday};
 
@@ -50,18 +49,42 @@ pub struct FormattingOptions {
     pub show_minutes: bool,
 }
 
+#[derive(Default)]
+enum Rounding {
+    #[allow(unused)]
+    Floor,
+    #[default]
+    Round,
+    Ceil,
+}
+
+impl Rounding {
+    fn apply(&self, value: f64) -> f64 {
+        match self {
+            Self::Floor => value.floor(),
+            Self::Round => value.round(),
+            Self::Ceil => value.ceil(),
+        }
+    }
+}
+
 trait Formatting {
-    fn format(&self, options: &FormattingOptions) -> String;
+    fn format_rounding(&self, options: &FormattingOptions, rounding: Rounding) -> String;
+
+    fn format(&self, options: &FormattingOptions) -> String {
+        self.format_rounding(options, Rounding::default())
+    }
 }
 
 impl Formatting for Duration {
-    fn format(&self, options: &FormattingOptions) -> String {
+    fn format_rounding(&self, options: &FormattingOptions, rounding: Rounding) -> String {
         if options.show_minutes {
             let hours = self.whole_hours();
             let minutes = (*self - Duration::hours(hours)).whole_minutes();
             format!("{}:{:0>2}", hours, minutes)
         } else {
-            format!("{}h", self.whole_hours())
+            let rounded_hours = rounding.apply(self.whole_minutes() as f64 / 60.0);
+            format!("{}h", rounded_hours)
         }
     }
 }
@@ -143,22 +166,6 @@ struct Goal<WT: WorkingTime> {
     working_time: WT,
 }
 
-impl<WT: WorkingTime> Display for Goal<WT> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{} {} {} {}",
-            self.target,
-            self.done,
-            self.working_time.used(),
-            self.working_time.left()
-        )
-    }
-}
-
-// TODO:
-// - daily target
-// - weekly target
 struct GoalStatus<WT: WorkingTime> {
     goal: Goal<WT>,
     estimated: Duration,
@@ -176,14 +183,14 @@ impl<WT: WorkingTime> GoalStatus<WT> {
 }
 
 impl<WT: WorkingTime> Formatting for GoalStatus<WT> {
-    fn format(&self, options: &FormattingOptions) -> String {
+    fn format_rounding(&self, options: &FormattingOptions, _rounding: Rounding) -> String {
         let weekly_target: Duration = self.daily_target * 5;
         format!(
             "{} {}/{} 🎯 {} a day, {} a week",
             self.emoji_indicator(),
             self.estimated.format(options),
             self.goal.target.format(options),
-            self.daily_target.format(options),
+            self.daily_target.format_rounding(options, Rounding::Ceil),
             weekly_target.format(options),
         )
     }
