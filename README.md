@@ -37,6 +37,7 @@ Options:
 - [x] add option to show time with minutes
 - [x] calculate optimal weekly and daily pace to hit the goal
 - [x] support show minutes flag in goal hints
+- [x] add harvest
 - [ ] adjust first column width to the longest client name
 - [ ] add option to display _Total_ row for all clients
 - [ ] add option to show weekly reports

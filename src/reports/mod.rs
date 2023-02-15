@@ -1,3 +1,4 @@
+pub mod harvest;
 pub mod toggl;
 
 use colored::*;

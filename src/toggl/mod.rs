@@ -142,14 +142,12 @@ impl Service {
     }
 
     pub fn get<T: DeserializeOwned>(&self, endpoint: Endpoint<T>) -> Result<T, reqwest::Error> {
-        let response = self
-            .client
+        self .client
             .get(endpoint.url())
             .basic_auth(&self.api_token, Some("api_token"))
             .header(CONTENT_TYPE, "application/json")
             .query(&endpoint.params)
-            .send();
-
-        response?.json()
+            .send()
+        ?.json()
     }
 }

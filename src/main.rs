@@ -1,7 +1,7 @@
-use billable::reports::Billable;
-use billable::reports::FormattingOptions;
+ use billable::reports::FormattingOptions;
 use billable::reports::Month;
 use clap::Parser;
+use colored::Colorize;
 use config::Config;
 
 #[derive(Parser, Debug)]
@@ -28,15 +28,21 @@ fn main() {
 
     let args = Args::parse();
 
-    let billable = billable::reports::toggl::Billable::new(config.api_token);
+    if let Some(services) = config.services {
+        for service in services.iter() {
+            println!("{}", service.display_name().bold());
 
-    for month in Month::current().iter().rev().take(args.months) {
-        billable.print_report(
-            month,
-            FormattingOptions {
-                show_minutes: args.show_minutes,
-            },
-            &config.clients,
-        );
+            let billable = service.billable();
+            for month in Month::current().iter().rev().take(args.months) {
+                billable.print_report(
+                    month,
+                    FormattingOptions {
+                        show_minutes: args.show_minutes,
+                    },
+                    &config.clients,
+                );
+            }
+            println!();
+        }
     }
 }
