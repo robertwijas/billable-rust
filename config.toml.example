@@ -1,4 +1,7 @@
-api_token = "<TOGGL API TOKEN>"
+services = [
+  { type = "Toggl", api_token = "<TOGGL API TOKEN>" },
+  { type = "Harvest", account_id = "<HARVEST ACCOUNT ID", api_token = "<HARVEST API TOKEN" },
+]
 
 # Configuration settings for your clients. Make sure the name matches the client's name in Toggl.
 [clients."My Best Client"]
