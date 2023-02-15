@@ -2,8 +2,13 @@
 name = "billable"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+authors = ["Robert Wijas"]
+description = "Displays monthly reports for billable hours. Supports Toggl and Harvest."
+homepage = "http://github.com/robertwijas/billable-rust"
+repository = "http://github.com/robertwijas/billable-rust"
+readme = "README.md"
+keywoards = ["cli", "toggl", "harvest"]
+cateogies = ["command-line-utilities"]
 
 [dependencies]
 config = "0.13"
