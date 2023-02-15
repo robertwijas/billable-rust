@@ -1,8 +1,10 @@
- use billable::reports::FormattingOptions;
+use billable::reports::FormattingOptions;
 use billable::reports::Month;
 use clap::Parser;
 use colored::Colorize;
 use config::Config;
+
+const CONFIG_FILE_NAME: &str = "config";
 
 #[derive(Parser, Debug)]
 struct Args {
@@ -16,13 +18,13 @@ fn main() {
     let project_dirs = directories::ProjectDirs::from("com", "robertwijas", "billable")
         .expect("failed to find project directory");
 
-    let user_config_path = project_dirs.config_dir().join("config");
+    let user_config_path = project_dirs.config_dir().join(CONFIG_FILE_NAME);
 
     let config = Config::builder()
         .add_source(config::File::with_name(user_config_path.to_str().unwrap()))
-        .add_source(config::File::with_name("config").required(false))
+        .add_source(config::File::with_name(CONFIG_FILE_NAME).required(false))
         .build()
-        .expect("cannot build config")
+        .expect("cannot build configuration")
         .try_deserialize::<billable::Config>()
         .expect("failed to read configuration");
 
@@ -30,7 +32,7 @@ fn main() {
 
     if let Some(services) = config.services {
         for service in services.iter() {
-            println!("{}", service.display_name().bold());
+            println!("[{}]", service.display_name().bold());
 
             let billable = service.billable();
             for month in Month::current().iter().rev().take(args.months) {
