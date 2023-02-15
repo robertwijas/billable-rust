@@ -8,7 +8,6 @@ pub mod toggl;
 
 #[derive(Deserialize, Debug)]
 pub struct Config {
-    pub api_token: String,
     pub clients: Option<HashMap<String, ClientConfig>>,
     pub services: Option<Vec<ServiceConfig>>,
 }
