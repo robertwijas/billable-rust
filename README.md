@@ -9,7 +9,7 @@ Configuration file `config.toml` is loaded from:
 * or `~/Library/Application Support/com.robertwijas.billable`
 
 Make sure the `config.toml` file is available in either one of these two locations. You can copy and modify the example configuation:
-https://github.com/robertwijas/billable-rust/blob/d96c71af64358c2ff8deb365473f0783401bc59f/config.toml.example#L1-L8
+https://github.com/robertwijas/billable-rust/blob/712609831f2790c9fa3ad6bdc71198b7ec4c3bd1/config.toml.example#L1-L11
 
 ## Usage
 
@@ -19,6 +19,7 @@ Usage: billable [OPTIONS]
 
 Options:
   -m, --months <MONTHS>  [default: 1]
+  -s, --show-minutes
   -h, --help             Print help
 ```
 
