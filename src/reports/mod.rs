@@ -1,3 +1,4 @@
+pub mod demo;
 pub mod harvest;
 pub mod toggl;
 

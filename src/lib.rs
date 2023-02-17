@@ -24,6 +24,10 @@ pub enum ServiceConfig {
         account_id: String,
         api_token: String,
     },
+    Demo {
+        name: Option<String>,
+        data: HashMap<String, Vec<f64>>,
+    },
 }
 
 impl ServiceConfig {
@@ -31,6 +35,7 @@ impl ServiceConfig {
         match self {
             Self::Toggl { name, .. } => name.clone().unwrap_or("Toggl".to_string()),
             Self::Harvest { name, .. } => name.clone().unwrap_or("Harvest".to_string()),
+            Self::Demo { name, .. } => name.clone().unwrap_or("Demo".to_string()),
         }
     }
     pub fn billable(&self) -> Box<dyn reports::Billable> {
@@ -47,6 +52,7 @@ impl ServiceConfig {
                 account_id: account_id.to_string(),
                 api_token: api_token.to_string(),
             })),
+            Self::Demo { name: _, data } => Box::new(reports::demo::Billable::new(data.clone())),
         }
     }
 }

@@ -2,6 +2,12 @@
 
 ![status](https://github.com/robertwijas/billable-rust/actions/workflows/rust.yml/badge.svg)
 
+A simple command line utility that displays monthly reports for billable hours.
+It integrates with [Toggl](http://track.toggl.com/) and [Harvest](https://www.getharvest.com).
+
+The key feature is the ability to set monthly goal for each client.
+Billable provides monthly estimates, daily and weekly targets based on the definied goal.
+
 ## Configuration
 
 Configuration file `config.toml` is loaded from:
@@ -10,6 +16,11 @@ Configuration file `config.toml` is loaded from:
 
 Make sure the `config.toml` file is available in either one of these two locations. You can copy and modify the example configuation:
 https://github.com/robertwijas/billable-rust/blob/712609831f2790c9fa3ad6bdc71198b7ec4c3bd1/config.toml.example#L1-L11
+
+```bash
+
+```
+
 
 ## Usage
 
@@ -39,14 +50,17 @@ Options:
 - [x] calculate optimal weekly and daily pace to hit the goal
 - [x] support show minutes flag in goal hints
 - [x] add harvest
+- [ ] add demo reports provider
+- [ ] replace colored with console
+- [ ] add example output to README (preferably based on the demo report)
+- [ ] automatically create configuration if missing, based on the `config.toml.example`
 - [ ] adjust first column width to the longest client name
+- [ ] write better README
+- [ ] support holidays (?) or allow to somehow override working days
 - [ ] add option to display _Total_ row for all clients
 - [ ] add option to show weekly reports
-- [ ] support holidays (?) or allow to somehow override working days
 - [ ] configure automatic releases with github actions
 - [ ] reports/configuration per project
-- [ ] write better README
-- [ ] use fixed hours in DEBUG mode 
 - [ ] display hours in PLN AKA support hourly rates :)
 - [ ] auto currency conversion
 - [ ] implement async http requests

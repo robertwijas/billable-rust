@@ -1,11 +1,21 @@
 services = [
-  { type = "Toggl", api_token = "<TOGGL API TOKEN>" },
-  { type = "Harvest", account_id = "<HARVEST ACCOUNT ID>", api_token = "<HARVEST API TOKEN>" },
+  # { type = "Toggl", api_token = "<TOGGL API TOKEN>" },
+  # { type = "Harvest", account_id = "<HARVEST ACCOUNT ID>", api_token = "<HARVEST API TOKEN>" },
+  
+  # Demo configuation that uses fake data, just to see how the app works.
+  { type = "Demo", name = "Toggl", data = { "My First Client" = [10, 17], "My Second Client" = [10, 30] } },
+  { type = "Demo", name = "Harvest", data = { "Harvest Client" = [20, 35] } },
 ]
 
+# DEMO
+
 # Configuration settings for your clients. Make sure the name matches the client's name in Toggl.
-[clients."My Best Client"]
+[clients."My First Client"]
 goal = 100 # optional target for number of billed hours per month
 
-[clients."My Worst Client"]
-goal = 10
+[clients."My Second Client"]
+goal = 20
+
+[clients."Harvest Client"]
+goal = 33
+

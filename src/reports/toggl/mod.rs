@@ -1,4 +1,7 @@
+use super::{BillableError, Client, Report};
 use crate::toggl::{Endpoint, Service};
+use std::ops::RangeInclusive;
+use time::{Date, Duration};
 
 pub struct Billable {
     service: Service,
@@ -11,10 +14,6 @@ impl Billable {
         }
     }
 }
-
-use super::{BillableError, Client, Report};
-use std::ops::RangeInclusive;
-use time::{Date, Duration};
 
 impl super::Billable for Billable {
     fn report(&self, range: &RangeInclusive<Date>) -> Result<super::Report, super::BillableError> {
