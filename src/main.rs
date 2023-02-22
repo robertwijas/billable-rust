@@ -1,4 +1,5 @@
-use billable::reports::FormattingOptions;
+use billable::reports::display::FormattingOptions;
+use billable::reports::display::Printer;
 use billable::reports::Month;
 use clap::Parser;
 use colored::Colorize;
@@ -33,18 +34,17 @@ fn main() {
         .expect("failed to read configuration");
 
     if let Some(services) = config.services {
+        let printer = Printer {
+            formatting_options: FormattingOptions {
+                show_minutes: args.show_minutes,
+            },
+        };
         for service in services.iter() {
             println!("[{}]", service.display_name().bold());
 
             let billable = service.billable();
             for month in Month::current().iter().rev().take(args.months) {
-                billable.print_report(
-                    month,
-                    FormattingOptions {
-                        show_minutes: args.show_minutes,
-                    },
-                    &config.clients,
-                );
+                printer.print(billable.monthly_report(month, &config.clients).unwrap());
             }
             println!();
         }

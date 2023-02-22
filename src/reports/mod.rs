@@ -1,16 +1,16 @@
-pub mod demo;
-pub mod harvest;
-pub mod toggl;
-
-use colored::*;
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::ops::RangeInclusive;
 use time::{Date, Duration, OffsetDateTime, Weekday};
 
-pub mod month;
-pub use month::*;
+pub mod demo;
+pub mod harvest;
+pub mod toggl;
+
 pub mod display;
+pub mod month;
+
+pub use month::*;
 
 pub trait Billable {
     fn clients_report(
@@ -18,87 +18,68 @@ pub trait Billable {
         range: &RangeInclusive<Date>,
     ) -> Result<Vec<ClientReport>, BillableError>;
 
-    fn print_report(
+    fn monthly_report(
         &self,
         month: Month,
-        options: FormattingOptions,
         configs: &Option<HashMap<String, ClientConfig>>,
-    ) {
-        println!("{}", format!("{}", month).bold().reversed());
-        let clients_report = self
-            .clients_report(&month.clone().into())
-            .expect("failed to prepare report");
-
-        for report in clients_report {
-            print!(
-                "{:<23} {:>5}",
-                report.client_name.dimmed(),
-                report.total.format(&options)
-            );
-
-            // TODO: why the line below has to be so ugly ???
-            let goal = configs
-                .as_ref()
-                .and_then(|x| x.get(&*report.client_name)?.goal);
-
-            if let Some(goal) = goal {
-                let goal = Goal {
-                    target: Duration::hours(goal.into()),
-                    working_time: Into::<RangeInclusive<Date>>::into(month.clone()),
-                };
-
-                let status = calculate_goal_status(goal, report.total);
-
-                print!(" {:^10}", status.format(&options));
-            }
-
-            println!();
-        }
+    ) -> Result<MonthlyReport, BillableError> {
+        self.clients_report(&month.clone().into())
+            .map(|clients_reports| {
+                clients_reports
+                    .iter()
+                    .map(|client_report| {
+                        let goal_status = configs
+                            .as_ref()
+                            .and_then(|x| x.get(&*client_report.client_name)?.goal)
+                            .map(|target| {
+                                calculate_goal_status(
+                                    Goal {
+                                        target: Duration::hours(target.into()),
+                                        working_time: month.clone(),
+                                    },
+                                    client_report.total,
+                                )
+                            });
+                        (client_report.clone(), goal_status)
+                    })
+                    .collect()
+            })
+            .map(|clients| MonthlyReport { month, clients })
     }
 }
 
-pub struct FormattingOptions {
-    pub show_minutes: bool,
+#[derive(Debug, Clone)]
+pub struct Goal<WT: WorkingTime> {
+    pub target: Duration,
+    pub working_time: WT,
 }
 
-#[derive(Default)]
-enum Rounding {
-    #[allow(unused)]
-    Floor,
-    #[default]
-    Round,
-    Ceil,
+pub struct GoalStatus<WT: WorkingTime> {
+    pub goal: Goal<WT>,
+    pub estimated: Duration,
+    pub daily_target: Option<Duration>,
 }
 
-impl Rounding {
-    fn apply(&self, value: f64) -> f64 {
-        match self {
-            Self::Floor => value.floor(),
-            Self::Round => value.round(),
-            Self::Ceil => value.ceil(),
-        }
-    }
+#[derive(Debug)]
+pub enum BillableError {
+    Default,
 }
 
-trait Formatting {
-    fn format_rounding(&self, options: &FormattingOptions, rounding: Rounding) -> String;
-
-    fn format(&self, options: &FormattingOptions) -> String {
-        self.format_rounding(options, Rounding::default())
-    }
+#[derive(Clone)]
+pub struct ClientReport {
+    client_name: String,
+    total: Duration,
 }
 
-impl Formatting for Duration {
-    fn format_rounding(&self, options: &FormattingOptions, rounding: Rounding) -> String {
-        if options.show_minutes {
-            let hours = self.whole_hours();
-            let minutes = (*self - Duration::hours(hours)).whole_minutes();
-            format!("{}:{:0>2}", hours, minutes)
-        } else {
-            let rounded_hours = rounding.apply(self.whole_minutes() as f64 / 60.0);
-            format!("{}h", rounded_hours)
-        }
-    }
+#[derive(Deserialize, Debug, Copy, Clone)]
+pub struct ClientConfig {
+    pub rate: Option<u16>,
+    pub goal: Option<u16>,
+}
+
+pub struct MonthlyReport {
+    pub month: Month,
+    pub clients: Vec<(ClientReport, Option<GoalStatus<Month>>)>,
 }
 
 fn calculate_goal_status<WT: WorkingTime>(goal: Goal<WT>, done: Duration) -> GoalStatus<WT> {
@@ -114,13 +95,12 @@ fn calculate_goal_status<WT: WorkingTime>(goal: Goal<WT>, done: Duration) -> Goa
     };
     GoalStatus {
         goal,
-        done,
         estimated,
         daily_target,
     }
 }
 
-trait WorkingTime {
+pub trait WorkingTime {
     fn used(&self) -> Duration;
     fn left(&self) -> Duration;
 }
@@ -138,6 +118,16 @@ impl WorkingTime for RangeInclusive<Date> {
             OffsetDateTime::now_utc().date(),
             *self.end(),
         ))
+    }
+}
+
+impl WorkingTime for Month {
+    fn used(&self) -> Duration {
+        Into::<RangeInclusive<Date>>::into(self.clone()).used()
+    }
+
+    fn left(&self) -> Duration {
+        Into::<RangeInclusive<Date>>::into(self.clone()).left()
     }
 }
 
@@ -175,68 +165,4 @@ mod tests {
             Duration::days(22)
         );
     }
-}
-
-#[derive(Debug, Clone)]
-struct Goal<WT: WorkingTime> {
-    target: Duration,
-    working_time: WT,
-}
-
-struct GoalStatus<WT: WorkingTime> {
-    goal: Goal<WT>,
-    #[allow(unused)]
-    done: Duration,
-    estimated: Duration,
-    daily_target: Option<Duration>,
-}
-
-impl<WT: WorkingTime> GoalStatus<WT> {
-    fn emoji_indicator(&self) -> &str {
-        if self.estimated < self.goal.target {
-            "🔴"
-        } else {
-            "🟢"
-        }
-    }
-}
-
-impl<WT: WorkingTime> Formatting for GoalStatus<WT> {
-    fn format_rounding(&self, options: &FormattingOptions, _rounding: Rounding) -> String {
-        let status = format!(
-            "{} {}/{}",
-            self.emoji_indicator(),
-            self.estimated.format(options),
-            self.goal.target.format(options)
-        );
-
-        if let Some(daily_target) = self.daily_target {
-            let weekly_target: Duration = daily_target * 5;
-
-            format!(
-                "{} 🎯 {} a day, {} a week",
-                status,
-                daily_target.format_rounding(options, Rounding::Ceil),
-                weekly_target.format(options),
-            )
-        } else {
-            status
-        }
-    }
-}
-
-#[derive(Debug)]
-pub enum BillableError {
-    Default,
-}
-
-pub struct ClientReport {
-    client_name: String,
-    total: Duration,
-}
-
-#[derive(Deserialize, Debug, Copy, Clone)]
-pub struct ClientConfig {
-    pub rate: Option<u16>,
-    pub goal: Option<u16>,
 }
