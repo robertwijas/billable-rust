@@ -1,4 +1,4 @@
-use super::{BillableError, Client, Report};
+use super::{BillableError, ClientReport};
 use crate::toggl::{Endpoint, Service};
 use std::ops::RangeInclusive;
 use time::{Date, Duration};
@@ -16,7 +16,10 @@ impl Billable {
 }
 
 impl super::Billable for Billable {
-    fn report(&self, range: &RangeInclusive<Date>) -> Result<super::Report, super::BillableError> {
+    fn clients_report(
+        &self,
+        range: &RangeInclusive<Date>,
+    ) -> Result<Vec<ClientReport>, BillableError> {
         self.service
             .get(Endpoint::me())
             .and_then(|user| {
@@ -26,23 +29,23 @@ impl super::Billable for Billable {
                     &range.end(),
                 ))
             })
-            .map(|summary| Report {
-                total: summary
+            .map_err(|e| {
+                eprintln!("{:?}", e);
+                BillableError::Default
+            })
+            .map(|report| {
+                report
                     .data
                     .iter()
-                    .map(|x| {
-                        (
-                            Client {
-                                name: x.title.client.clone().unwrap_or(String::from("Unassigned")),
-                            },
-                            Duration::milliseconds(x.time.into()),
-                        )
+                    .map(|client_summary| ClientReport {
+                        client_name: client_summary
+                            .title
+                            .client
+                            .clone()
+                            .unwrap_or(String::from("Unassigned")),
+                        total: Duration::milliseconds(client_summary.time.into()),
                     })
-                    .collect(),
-            })
-            .map_err(|e| {
-                println!("{:?}", e);
-                BillableError::Default
+                    .collect()
             })
     }
 }

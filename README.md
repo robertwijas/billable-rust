@@ -50,12 +50,17 @@ Options:
 - [x] calculate optimal weekly and daily pace to hit the goal
 - [x] support show minutes flag in goal hints
 - [x] add harvest
-- [ ] add demo reports provider
+- [x] add demo reports provider
+- [x] automatically create configuration if missing, based on the `config.toml.example`
 - [ ] replace colored with console
+- [ ] extract styling code using Style from console
 - [ ] add example output to README (preferably based on the demo report)
-- [ ] automatically create configuration if missing, based on the `config.toml.example`
 - [ ] adjust first column width to the longest client name
 - [ ] write better README
+- [ ] create CHANGELOG
+
+# Ideas
+
 - [ ] support holidays (?) or allow to somehow override working days
 - [ ] add option to display _Total_ row for all clients
 - [ ] add option to show weekly reports

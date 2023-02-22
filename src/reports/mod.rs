@@ -10,9 +10,13 @@ use time::{Date, Duration, OffsetDateTime, Weekday};
 
 pub mod month;
 pub use month::*;
+pub mod display;
 
 pub trait Billable {
-    fn report(&self, range: &RangeInclusive<Date>) -> Result<Report, BillableError>;
+    fn clients_report(
+        &self,
+        range: &RangeInclusive<Date>,
+    ) -> Result<Vec<ClientReport>, BillableError>;
 
     fn print_report(
         &self,
@@ -21,22 +25,29 @@ pub trait Billable {
         configs: &Option<HashMap<String, ClientConfig>>,
     ) {
         println!("{}", format!("{}", month).bold().reversed());
-        let report = self
-            .report(&month.clone().into())
+        let clients_report = self
+            .clients_report(&month.clone().into())
             .expect("failed to prepare report");
 
-        for (client, hours) in report.total {
-            print!("{:<23} {:>5}", client.dimmed(), hours.format(&options));
+        for report in clients_report {
+            print!(
+                "{:<23} {:>5}",
+                report.client_name.dimmed(),
+                report.total.format(&options)
+            );
 
             // TODO: why the line below has to be so ugly ???
-            let goal = configs.as_ref().and_then(|x| x.get(&*client)?.goal);
+            let goal = configs
+                .as_ref()
+                .and_then(|x| x.get(&*report.client_name)?.goal);
+
             if let Some(goal) = goal {
                 let goal = Goal {
                     target: Duration::hours(goal.into()),
                     working_time: Into::<RangeInclusive<Date>>::into(month.clone()),
                 };
 
-                let status = calculate_goal_status(goal, hours);
+                let status = calculate_goal_status(goal, report.total);
 
                 print!(" {:^10}", status.format(&options));
             }
@@ -219,22 +230,9 @@ pub enum BillableError {
     Default,
 }
 
-#[derive(Debug)]
-pub struct Report {
-    pub total: Vec<(Client, Duration)>,
-}
-
-#[derive(Debug)]
-pub struct Client {
-    pub name: String,
-}
-
-impl std::ops::Deref for Client {
-    type Target = String;
-
-    fn deref(&self) -> &Self::Target {
-        &self.name
-    }
+pub struct ClientReport {
+    client_name: String,
+    total: Duration,
 }
 
 #[derive(Deserialize, Debug, Copy, Clone)]

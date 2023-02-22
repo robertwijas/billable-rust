@@ -62,6 +62,7 @@ fn main() {
                 "An example configuration has been saved at:\n{}",
                 path.to_str().unwrap()
             );
+            println!();
             println!(
                 "You can run billable again to see demo reports \
                      or edit the configuration file to use your Toggl/Harvest account."
