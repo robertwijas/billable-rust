@@ -8,33 +8,47 @@ It integrates with [Toggl](http://track.toggl.com/) and [Harvest](https://www.ge
 The key feature is the ability to set monthly goal for each client.
 Billable provides monthly estimates, daily and weekly targets based on the definied goal.
 
+## Output example
+
+```bash
+# billable -s -m 2
+[Toggl]
+February 2023
+My Second Client        19:00 🟢 23:28/20:00 🎯 0:15 a day, 1:15 a week
+My First Client         23:00 🔴 28:24/30:00 🎯 1:45 a day, 8:45 a week
+January 2023
+My Second Client        30:00 🟢 30:00/20:00
+My First Client         17:00 🔴 17:00/30:00
+
+[Harvest]
+February 2023
+Harvest Client          27:00 🟢 33:21/33:00 🎯 1:30 a day, 7:30 a week
+January 2023
+Harvest Client          35:00 🟢 35:00/33:00
+```
+
 ## Configuration
 
 Configuration file `config.toml` is loaded from:
 * current directory
 * or `~/Library/Application Support/com.robertwijas.billable`
 
-Make sure the `config.toml` file is available in either one of these two locations. You can copy and modify the example configuation:
-https://github.com/robertwijas/billable-rust/blob/712609831f2790c9fa3ad6bdc71198b7ec4c3bd1/config.toml.example#L1-L11
-
-```bash
-
-```
-
+Running `billable` presents and option to create a sample config.
 
 ## Usage
 
 ```bash
-billable --help
+# billable --help
 Usage: billable [OPTIONS]
 
 Options:
-  -m, --months <MONTHS>  [default: 1]
+  -m, --months <MONTHS>            [default: 1]
   -s, --show-minutes
-  -h, --help             Print help
+  -c, --config-name <CONFIG_NAME>  [default: config]
+  -h, --help                       Print help
 ```
 
-## Todos 
+## Todos/Features
 
 - [x] show hours for current month per client
 - [x] remove hardcoded month
@@ -52,15 +66,11 @@ Options:
 - [x] add harvest
 - [x] add demo reports provider
 - [x] automatically create configuration if missing, based on the `config.toml.example`
+- [x] add example output to README (preferably based on the demo report)
 - [ ] replace colored with console
 - [ ] extract styling code using Style from console
-- [ ] add example output to README (preferably based on the demo report)
 - [ ] adjust first column width to the longest client name
-- [ ] write better README
 - [ ] create CHANGELOG
-
-# Ideas
-
 - [ ] support holidays (?) or allow to somehow override working days
 - [ ] add option to display _Total_ row for all clients
 - [ ] add option to show weekly reports
@@ -70,8 +80,3 @@ Options:
 - [ ] auto currency conversion
 - [ ] implement async http requests
 
-## Notes 
-
-### How to store configuration?
-
-This looks good: https://docs.rs/config/latest/config/.
