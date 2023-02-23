@@ -27,6 +27,13 @@ January 2023
 Harvest Client          35:00 🟢 35:00/33:00
 ```
 
+## Installation
+
+You can install `billable` with [cargo](https://github.com/rust-lang/cargo):
+```
+cargo install billable
+```
+
 ## Configuration
 
 Configuration file `config.toml` is loaded from:
