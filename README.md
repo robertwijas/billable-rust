@@ -40,7 +40,7 @@ Configuration file `config.toml` is loaded from:
 * current directory
 * or `~/Library/Application Support/com.robertwijas.billable`
 
-Running `billable` presents and option to create a sample config.
+Running `billable` presents an option to create a sample config.
 
 ## Usage
 
