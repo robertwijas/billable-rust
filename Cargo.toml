@@ -9,6 +9,7 @@ repository = "http://github.com/robertwijas/billable-rust"
 readme = "README.md"
 keywords = ["cli", "toggl", "harvest"]
 categories = ["command-line-utilities"]
+license = "Apache-2.0"
 
 [dependencies]
 config = "0.13"
