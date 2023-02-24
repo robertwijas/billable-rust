@@ -56,6 +56,12 @@ fn main() {
             .unwrap_or(false)
         {
             let path = user_config_path.with_extension("toml");
+            std::fs::create_dir_all(
+                &path
+                    .parent()
+                    .expect("config location should have parent directory"),
+            )
+            .expect("failed to create directory for configuration");
             std::fs::write(&path, CONFIG_FILE_EXAMPLE).expect("failed to write configuration");
 
             println!(
